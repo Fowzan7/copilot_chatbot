@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floating Copilot Chat Widget</title>
+    <style>
+        /* Floating Chat Button Styles */
+        .floating-chat-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1001;
+            border: none;
+        }
+
+        .floating-chat-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .floating-chat-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        /* Chat Widget Container */
+        .chat-widget {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 400px;
+            height: 600px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+            border: 1px solid #e1e1e1;
+        }
+
+        .chat-widget.show {
+            display: flex;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Chat Header */
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* Chat Body */
+        .chat-body {
+            flex: 1;
+            padding: 0;
+            background: #f8f9fa;
+        }
+
+        .chat-body iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .chat-widget {
+                width: calc(100vw - 40px);
+                height: calc(100vh - 120px);
+                bottom: 90px;
+                right: 20px;
+                left: 20px;
+            }
+
+            .floating-chat-btn {
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .fade-out {
+            animation: fadeOut 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Pulsing animation for the button */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Chat Button -->
+    <button class="floating-chat-btn pulse" id="chatToggle">
+        <!-- Chat Icon SVG -->
+        <svg viewBox="0 0 24 24">
+            <path d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4C22,2.89 21.1,2 20,2M6,9H18V11H6M14,14H6V12H14M18,8H6V6H18V8Z"/>
+        </svg>
+    </button>
+
+    <!-- Chat Widget Container -->
+    <div class="chat-widget" id="chatWidget">
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <h3>AI Assistant</h3>
+            <button class="close-btn" id="closeChat">&times;</button>
+        </div>
+
+        <!-- Chat Body with Copilot Iframe -->
+        <div class="chat-body">
+            <iframe 
+                src="https://copilotstudio.microsoft.com/environments/Default-a8e5d571-43e8-4c3c-96be-344156cf6887/bots/cre88_powerBiReportAssistant/webchat?__version__=2"
+                title="Copilot AI Assistant">
+            </iframe>
+        </div>
+    </div>
+
+    <script>
+        // Get elements
+        const chatToggle = document.getElementById('chatToggle');
+        const chatWidget = document.getElementById('chatWidget');
+        const closeChat = document.getElementById('closeChat');
+
+        // Toggle chat widget
+        function toggleChat() {
+            if (chatWidget.classList.contains('show')) {
+                closeChat.click(); // Use close animation
+            } else {
+                openChat();
+            }
+        }
+
+        // Open chat widget
+        function openChat() {
+            chatWidget.classList.add('show');
+            chatToggle.classList.remove('pulse'); // Remove pulsing when opened
+
+            // Change button icon to minimize
+            chatToggle.innerHTML = `
+                <svg viewBox="0 0 24 24">
+                    <path d="M19,13H5V11H19V13Z"/>
+                </svg>
+            `;
+        }
+
+        // Close chat widget
+        function closeChat() {
+            chatWidget.classList.add('fade-out');
+
+            setTimeout(() => {
+                chatWidget.classList.remove('show', 'fade-out');
+                chatToggle.classList.add('pulse'); // Add pulsing back when closed
+
+                // Change button icon back to chat
+                chatToggle.innerHTML = `
+                    <svg viewBox="0 0 24 24">
+                        <path d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4C22,2.89 21.1,2 20,2M6,9H18V11H6M14,14H6V12H14M18,8H6V6H18V8Z"/>
+                    </svg>
+                `;
+            }, 250);
+        }
+
+        // Event listeners
+        chatToggle.addEventListener('click', toggleChat);
+        closeChat.addEventListener('click', closeChat);
+
+        // Optional: Close chat when clicking outside (uncomment if desired)
+        /*
+        document.addEventListener('click', function(event) {
+            if (!chatWidget.contains(event.target) && !chatToggle.contains(event.target)) {
+                if (chatWidget.classList.contains('show')) {
+                    closeChat();
+                }
+            }
+        });
+        */
+
+        // Optional: Add keyboard support (ESC to close)
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && chatWidget.classList.contains('show')) {
+                closeChat();
+            }
+        });
+    </script>
+</body>
+</html>
