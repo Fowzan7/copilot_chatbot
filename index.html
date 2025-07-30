@@ -3,199 +3,338 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Chat Widget</title>
+    <title>Floating Copilot Chat Widget</title>
     <style>
-        body { 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; /* Prevent body scrolling */
+            height: 100vh;
             background: transparent;
         }
 
-        .mini-chat-btn {
+        /* Floating chat button */
+        .floating-chat-btn {
             position: fixed;
             bottom: 20px;
             right: 20px;
             width: 60px;
             height: 60px;
-            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 50%;
-            border: none;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
             cursor: pointer;
+            z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 28px;
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
-            z-index: 1000;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            animation: pulse 3s infinite;
+            font-size: 24px;
+            border: none;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
         }
 
-        .mini-chat-btn:hover { 
+        .floating-chat-btn:hover {
             transform: scale(1.1);
-            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.6);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
         }
 
-        .mini-chat-btn.open {
-            width: 400px;
-            height: 500px;
-            border-radius: 16px;
-            bottom: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+        .floating-chat-btn.open {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
             animation: none;
         }
 
-        .chat-header {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 16px 16px 0 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            backdrop-filter: blur(10px);
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            }
+            50% {
+                box-shadow: 0 4px 30px rgba(102, 126, 234, 0.8);
+            }
+            100% {
+                box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            }
         }
 
-        .chat-header.active {
-            display: flex;
-        }
-
-        .chat-title {
-            color: white;
-            font-weight: 600;
-            font-size: 16px;
-            margin: 0;
-        }
-
-        .close-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: all 0.2s ease;
-        }
-
-        .close-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .chat-content {
-            display: none;
-            position: absolute;
-            top: 60px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border-radius: 0 0 16px 16px;
+        /* Chat widget container */
+        .chat-widget {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 400px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
             overflow: hidden;
         }
 
-        .chat-content.active {
-            display: block;
+        .chat-widget.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
         }
 
-        .chat-content iframe {
+        .chat-iframe {
             width: 100%;
             height: 100%;
             border: none;
-            border-radius: 0 0 16px 16px;
+            border-radius: 15px;
         }
 
-        @keyframes pulse {
-            0% { 
-                box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
-            }
-            50% { 
-                box-shadow: 0 4px 30px rgba(139, 92, 246, 0.8);
-            }
-            100% { 
-                box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
-            }
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         /* Mobile responsive */
         @media (max-width: 480px) {
-            .mini-chat-btn.open {
-                width: calc(100vw - 20px);
-                height: calc(100vh - 40px);
-                bottom: 10px;
-                right: 10px;
-                left: 10px;
-                border-radius: 12px;
+            .chat-widget {
+                width: calc(100vw - 40px);
+                height: calc(100vh - 140px);
+                bottom: 90px;
+                right: 20px;
+                left: 20px;
             }
+
+            .floating-chat-btn {
+                width: 56px;
+                height: 56px;
+                font-size: 22px;
+            }
+        }
+
+        /* Chat icon using CSS */
+        .chat-icon {
+            position: relative;
+            width: 28px;
+            height: 28px;
+        }
+
+        .chat-icon::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 16px;
+            background: currentColor;
+            border-radius: 8px 8px 2px 8px;
+            top: 2px;
+            left: 4px;
+        }
+
+        .chat-icon::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: currentColor;
+            border-radius: 50%;
+            bottom: 8px;
+            right: 8px;
+        }
+
+        .close-icon {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Notification badge */
+        .notification-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            background: #ff4757;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .notification-badge.show {
+            opacity: 1;
+            transform: scale(1);
         }
     </style>
 </head>
 <body>
-    <div class="mini-chat-btn" id="chatBtn" onclick="toggleChat()">
-        <span id="chatIcon">💬</span>
-    </div>
+    <!-- Floating chat button -->
+    <button class="floating-chat-btn" id="chatBtn" aria-label="Open chat">
+        <div class="chat-icon" id="chatIcon"></div>
+        <div class="close-icon" id="closeIcon" style="display: none;">✕</div>
+        <div class="notification-badge" id="notificationBadge">1</div>
+    </button>
 
-    <div class="chat-header" id="chatHeader">
-        <h3 class="chat-title">AI Assistant</h3>
-        <button class="close-btn" onclick="toggleChat()">✕</button>
-    </div>
-
-    <div class="chat-content" id="chatContent">
-        <iframe src="https://copilotstudio.microsoft.com/environments/Default-a8e5d571-43e8-4c3c-96be-344156cf6887/bots/cre88_powerBiReportAssistant/webchat?__version__=2" 
-                loading="lazy"></iframe>
+    <!-- Chat widget -->
+    <div class="chat-widget" id="chatWidget">
+        <div class="loading-spinner" id="loadingSpinner"></div>
+        <iframe 
+            class="chat-iframe" 
+            id="chatIframe"
+            src="https://copilotstudio.microsoft.com/environments/Default-a8e5d571-43e8-4c3c-96be-344156cf6887/bots/cre88_powerBiReportAssistant/webchat?__version__=2"
+            title="Copilot Chat Assistant"
+            allow="microphone; camera; fullscreen"
+            loading="lazy">
+        </iframe>
     </div>
 
     <script>
-        let isOpen = false;
+        class FloatingChatWidget {
+            constructor() {
+                this.chatBtn = document.getElementById('chatBtn');
+                this.chatWidget = document.getElementById('chatWidget');
+                this.chatIframe = document.getElementById('chatIframe');
+                this.loadingSpinner = document.getElementById('loadingSpinner');
+                this.chatIcon = document.getElementById('chatIcon');
+                this.closeIcon = document.getElementById('closeIcon');
+                this.notificationBadge = document.getElementById('notificationBadge');
 
-        function toggleChat() {
-            const btn = document.getElementById('chatBtn');
-            const content = document.getElementById('chatContent');
-            const header = document.getElementById('chatHeader');
-            const icon = document.getElementById('chatIcon');
+                this.isOpen = false;
+                this.isLoaded = false;
 
-            if (isOpen) {
-                // Close chat
-                btn.classList.remove('open');
-                content.classList.remove('active');
-                header.classList.remove('active');
-                icon.innerHTML = '💬';
-                isOpen = false;
-            } else {
-                // Open chat
-                btn.classList.add('open');
-                content.classList.add('active');
-                header.classList.add('active');
-                icon.innerHTML = '';
-                isOpen = true;
+                this.init();
+            }
+
+            init() {
+                this.attachEventListeners();
+                this.showNotificationBadge();
+                console.log('Floating chat widget initialized');
+            }
+
+            attachEventListeners() {
+                // Chat button click
+                this.chatBtn.addEventListener('click', () => this.toggleChat());
+
+                // Close chat when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!this.chatWidget.contains(e.target) && 
+                        !this.chatBtn.contains(e.target) && 
+                        this.isOpen) {
+                        this.closeChat();
+                    }
+                });
+
+                // Keyboard support
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.isOpen) {
+                        this.closeChat();
+                    }
+                });
+
+                // Iframe load event
+                this.chatIframe.addEventListener('load', () => {
+                    this.handleIframeLoad();
+                });
+
+                // Iframe error handling
+                this.chatIframe.addEventListener('error', () => {
+                    console.error('Failed to load chat widget');
+                    this.loadingSpinner.style.display = 'none';
+                });
+            }
+
+            toggleChat() {
+                if (this.isOpen) {
+                    this.closeChat();
+                } else {
+                    this.openChat();
+                }
+            }
+
+            openChat() {
+                console.log('Opening chat widget...');
+                this.isOpen = true;
+                this.chatWidget.classList.add('open');
+                this.chatBtn.classList.add('open');
+
+                // Switch icons
+                this.chatIcon.style.display = 'none';
+                this.closeIcon.style.display = 'block';
+
+                // Hide notification badge
+                this.notificationBadge.classList.remove('show');
+
+                // Load iframe if not already loaded
+                if (!this.isLoaded) {
+                    this.loadingSpinner.style.display = 'block';
+                }
+
+                // Accessibility
+                this.chatBtn.setAttribute('aria-expanded', 'true');
+                this.chatBtn.setAttribute('aria-label', 'Close chat');
+            }
+
+            closeChat() {
+                console.log('Closing chat widget...');
+                this.isOpen = false;
+                this.chatWidget.classList.remove('open');
+                this.chatBtn.classList.remove('open');
+
+                // Switch icons
+                this.chatIcon.style.display = 'block';
+                this.closeIcon.style.display = 'none';
+
+                // Accessibility
+                this.chatBtn.setAttribute('aria-expanded', 'false');
+                this.chatBtn.setAttribute('aria-label', 'Open chat');
+            }
+
+            handleIframeLoad() {
+                console.log('Copilot iframe loaded successfully');
+                this.isLoaded = true;
+                this.loadingSpinner.style.display = 'none';
+            }
+
+            showNotificationBadge() {
+                // Show notification badge after 5 seconds to draw attention
+                setTimeout(() => {
+                    if (!this.isOpen) {
+                        this.notificationBadge.classList.add('show');
+                    }
+                }, 5000);
             }
         }
 
-        // Add keyboard support
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && isOpen) {
-                toggleChat();
-            }
+        // Initialize the widget when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new FloatingChatWidget();
         });
 
-        // Prevent clicks inside the expanded chat from closing it
-        document.getElementById('chatContent').addEventListener('click', function(event) {
-            event.stopPropagation();
-        });
-
-        document.getElementById('chatHeader').addEventListener('click', function(event) {
-            event.stopPropagation();
+        // Prevent the widget from interfering with parent page
+        window.addEventListener('message', (event) => {
+            // Handle messages from the iframe if needed
+            console.log('Message received:', event.data);
         });
     </script>
 </body>
